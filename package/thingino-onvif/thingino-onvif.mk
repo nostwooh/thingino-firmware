@@ -109,15 +109,7 @@ endef
 
 ifeq ($(BR2_PACKAGE_WYZE_ACCESSORY_FLOODLIGHT),y)
 define THINGINO_ONVIF_INSTALL_FLOODLIGHT_RELAY
-	$(SED) -i '/"relays": \[/,/^  ]/ {/^  ]/ i\
-    ,\
-    {\
-      "close": "/usr/sbin/floodlight_ctl off",\
-      "idle_state": "close",\
-      "open": "/usr/sbin/floodlight_ctl on 100",\
-      "token": "Floodlight"\
-    }
-}' $(TARGET_DIR)/etc/onvif.json
+	$(SED) -i 's|"token": "IRLEDs"$$|"token": "IRLEDs"\n    },\n    {\n      "close": "/usr/sbin/floodlight_ctl off",\n      "idle_state": "close",\n      "open": "/usr/sbin/floodlight_ctl on 100",\n      "token": "Floodlight"|' $(TARGET_DIR)/etc/onvif.json
 endef
 THINGINO_ONVIF_INSTALL_TARGET_CMDS += $(THINGINO_ONVIF_INSTALL_FLOODLIGHT_RELAY)
 endif
