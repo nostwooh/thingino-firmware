@@ -150,6 +150,14 @@ controls. MQTT topics use the camera hostname as `<id>`:
 Send `ON` or `OFF` to the on/off topic. Send an integer from `1` through
 `100` to the brightness command topic.
 
+ONVIF
+-----
+
+Floodlight V1 images expose the fixture through the ONVIF DeviceIO service as
+one bistable relay with the token `Floodlight`. Set the relay state to `active`
+to turn the fixture on at 100%; set it to `inactive` to turn it off. This uses
+the same relay interface as the existing IR LED controls.
+
 Troubleshooting
 ---------------
 
