@@ -101,8 +101,15 @@ define THINGINO_ONVIF_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -m 0644 $(@D)/res/onvif.json \
 		$(TARGET_DIR)/etc/onvif.json
 
+
+	# S96onvif_discovery is streamer-specific and installed by the selected streamer package.
+	$(INSTALL) -D -m 0755 $(THINGINO_ONVIF_PKGDIR)/files/S97onvif_notify \
+		$(TARGET_DIR)/etc/init.d/S97onvif_notify
+endef
+
 ifeq ($(BR2_PACKAGE_WYZE_ACCESSORY_FLOODLIGHT),y)
-	$(SED) '/"relays": \[/,/]/{/^[[:space:]]*]$/i\
+define THINGINO_ONVIF_INSTALL_FLOODLIGHT_RELAY
+	$(SED) -i '/"relays": \[/,/^  ]/ {/^  ]/ i\
     ,\
     {\
       "close": "/usr/sbin/floodlight_ctl off",\
@@ -111,11 +118,8 @@ ifeq ($(BR2_PACKAGE_WYZE_ACCESSORY_FLOODLIGHT),y)
       "token": "Floodlight"\
     }
 }' $(TARGET_DIR)/etc/onvif.json
-endif
-
-	# S96onvif_discovery is streamer-specific and installed by the selected streamer package.
-	$(INSTALL) -D -m 0755 $(THINGINO_ONVIF_PKGDIR)/files/S97onvif_notify \
-		$(TARGET_DIR)/etc/init.d/S97onvif_notify
 endef
+THINGINO_ONVIF_INSTALL_TARGET_CMDS += $(THINGINO_ONVIF_INSTALL_FLOODLIGHT_RELAY)
+endif
 
 $(eval $(generic-package))
