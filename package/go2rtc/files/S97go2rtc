@@ -4,6 +4,7 @@
 DAEMON="/usr/bin/go2rtc"
 
 DAEMON_ARGS="-d -c /etc/go2rtc.yaml"
+[ -r /etc/go2rtc-homekit.yaml ] && DAEMON_ARGS="$DAEMON_ARGS -c /etc/go2rtc-homekit.yaml"
 PIDFILE="/run/go2rtc.pid"
 
 start_daemon() {
