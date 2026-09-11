@@ -1,0 +1,6 @@
+streams:
+  homekit: rtsp://127.0.0.1/ch0
+homekit:
+  homekit:
+    name: Thingino Camera
+    category_id: camera

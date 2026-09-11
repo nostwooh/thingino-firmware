@@ -1,0 +1,1 @@
+{"name":"homekit","label":"HomeKit","apiVersion":1,"nav":[{"section":"ddSettings","position":"append","items":[{"label":"HomeKit","href":"/config-homekit.html"}]}],"scripts":[],"styles":[],"preview":{"scripts":[],"html":null},"featureFlags":{"homekit":true},"cgi":["/x/json-config-homekit.cgi","/x/homekit-qr.cgi"],"pages":["/config-homekit.html"]}

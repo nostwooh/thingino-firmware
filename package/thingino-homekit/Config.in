@@ -1,0 +1,6 @@
+config BR2_PACKAGE_THINGINO_HOMEKIT
+	bool "Thingino HomeKit camera"
+	select BR2_PACKAGE_GO2RTC
+	select BR2_PACKAGE_QRENCODE
+	help
+	  Expose the standard Thingino RTSP camera feed as a native HomeKit camera.
