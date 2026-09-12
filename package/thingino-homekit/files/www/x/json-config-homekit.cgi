@@ -2,7 +2,7 @@
 . /var/www/x/auth.sh
 require_auth
 CONF=/etc/go2rtc-homekit.yaml
-state() { wget -qO- http://127.0.0.1:1984/api/homekit?id=homekit; }
+state() { curl -fsS -qO- http://127.0.0.1:1984/api/homekit?id=homekit; }
 reply() { printf 'Content-Type: application/json\nCache-Control: no-store\n\n%s\n' "$1"; exit; }
 case "$REQUEST_METHOD" in
 GET|"") value=$(state); [ -n "$value" ] && reply "$value" || reply '{"error":{"message":"HomeKit service unavailable"}}' ;;
