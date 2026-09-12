@@ -1,4 +1,5 @@
 config BR2_PACKAGE_QRENCODE
 	bool "qrencode"
+	select BR2_PACKAGE_LIBPNG
 	help
 	  Generate QR-code symbols. Provides the `qrencode` command-line tool.
