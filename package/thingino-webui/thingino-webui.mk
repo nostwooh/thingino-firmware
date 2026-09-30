@@ -80,6 +80,8 @@ define THINGINO_WEBUI_INSTALL_TARGET_CMDS
 		$(TARGET_DIR)/var/www/config-admin.html
 	$(INSTALL) -D -m 0644 $(THINGINO_WEBUI_PKGDIR)/files/www/config-network.html \
 		$(TARGET_DIR)/var/www/config-network.html
+	$(INSTALL) -D -m 0644 $(THINGINO_WEBUI_PKGDIR)/files/www/config-motion-guard-masks.html \
+		$(TARGET_DIR)/var/www/config-motion-guard-masks.html
 
 	$(INSTALL) -D -m 0644 $(THINGINO_WEBUI_PKGDIR)/files/www/config-syslog.html \
 		$(TARGET_DIR)/var/www/config-syslog.html
