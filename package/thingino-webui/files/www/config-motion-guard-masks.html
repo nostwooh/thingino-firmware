@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>thingino · Motion Guard masks</title>
+  <script src="/a/theme-init.js"></script>
+  <link rel="icon" type="image/svg+xml" href="/a/favicon.svg">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/a/main.css">
+  <style>
+    #mask-stage { aspect-ratio:16 / 9; background:#121820; overflow:hidden; touch-action:none; }
+    #mask-preview { width:100%; height:100%; object-fit:cover; }
+    .motion-mask { position:absolute; border:2px solid; cursor:move; min-width:28px; min-height:28px; }
+    .motion-mask.include { border-color:#38d996; background:rgb(56 217 150 / 22%); }
+    .motion-mask.exclude { border-color:#ff6674; background:rgb(255 102 116 / 22%); }
+    .motion-mask.selected { box-shadow:0 0 0 3px rgb(255 255 255 / 78%); z-index:2; }
+    .motion-mask-label { position:absolute; top:4px; left:4px; padding:1px 5px; border-radius:4px; color:#06100c; background:#38d996; font-size:.72rem; font-weight:700; pointer-events:none; }
+    .exclude .motion-mask-label { color:#fff; background:#dc4656; }
+    .motion-mask-handle { position:absolute; width:13px; height:13px; right:-7px; bottom:-7px; border:2px solid #fff; background:currentColor; cursor:nwse-resize; }
+    #mask-empty { inset:0; color:#aab4bf; pointer-events:none; }
+    #mask-json { min-height:150px; font-family:var(--bs-font-monospace); font-size:.8rem; resize:vertical; }
+  </style>
+</head>
+<body id="page-motion-guard-masks">
+<nav data-app-nav></nav>
+
+<main class="pb-4">
+  <div class="container" style="min-height:80vh">
+    <div data-app-controls></div>
+    <section>
+      <div class="card mb-3">
+        <div class="card-header">
+          <h2 class="card-title">Motion Guard masks</h2>
+          <small>Draw regions that should be included in or excluded from motion detection.</small>
+        </div>
+        <div class="card-body">
+          <div id="mask-stage" class="position-relative rounded border">
+            <img id="mask-preview" src="/x/ch0.jpg" alt="Camera preview">
+            <div id="mask-empty" class="position-absolute d-flex align-items-center justify-content-center text-center p-4">
+              Add a region, then drag it or use the lower-right handle to resize it.
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-success" type="button" id="add-include"><i class="bi bi-plus-lg"></i> Add include area</button>
+            <button class="btn btn-danger" type="button" id="add-exclude"><i class="bi bi-plus-lg"></i> Add exclude area</button>
+            <button class="btn btn-outline-secondary" type="button" id="delete-mask" disabled><i class="bi bi-trash"></i> Delete selected</button>
+            <button class="btn btn-outline-secondary" type="button" id="clear-masks"><i class="bi bi-x-circle"></i> Clear all</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">
+          <h3 class="card-title">Selected area</h3>
+          <small>Coordinates are percentages of the camera frame.</small>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="mask-mode">Detection mode</label>
+              <select class="form-select" id="mask-mode" disabled>
+                <option value="include">Include motion</option>
+                <option value="exclude">Exclude motion</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2"><label class="form-label" for="mask-x">Left</label><input class="form-control" id="mask-x" type="number" min="0" max="100" step="0.1" disabled></div>
+            <div class="col-6 col-md-2"><label class="form-label" for="mask-y">Top</label><input class="form-control" id="mask-y" type="number" min="0" max="100" step="0.1" disabled></div>
+            <div class="col-6 col-md-2"><label class="form-label" for="mask-width">Width</label><input class="form-control" id="mask-width" type="number" min="1" max="100" step="0.1" disabled></div>
+            <div class="col-6 col-md-2"><label class="form-label" for="mask-height">Height</label><input class="form-control" id="mask-height" type="number" min="1" max="100" step="0.1" disabled></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">
+          <h3 class="card-title">Mask configuration</h3>
+          <small>Copy or download the generated JSON to apply it with Motion Guard.</small>
+        </div>
+        <div class="card-body">
+          <textarea id="mask-json" class="form-control" readonly aria-label="Motion mask JSON"></textarea>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-primary" type="button" id="copy-json"><i class="bi bi-clipboard"></i> Copy JSON</button>
+            <button class="btn btn-outline-primary" type="button" id="download-json"><i class="bi bi-download"></i> Download JSON</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer data-app-footer></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script src="/a/main.js"></script>
+<script src="/a/runtime-config.js"></script>
+<script src="/a/control-bar.js"></script>
+<script src="/a/navigation.js"></script>
+<script src="/a/footer.js"></script>
+<script>
+  (function () {
+    const stage = document.querySelector("#mask-stage");
+    const empty = document.querySelector("#mask-empty");
+    const removeButton = document.querySelector("#delete-mask");
+    const jsonOutput = document.querySelector("#mask-json");
+    const inputs = {
+      mode: document.querySelector("#mask-mode"),
+      x: document.querySelector("#mask-x"),
+      y: document.querySelector("#mask-y"),
+      width: document.querySelector("#mask-width"),
+      height: document.querySelector("#mask-height"),
+    };
+    let selectedId = null;
+    let drag = null;
+    let nextId = 1;
+    const masks = [];
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function selected() {
+      return masks.find((mask) => mask.id === selectedId);
+    }
+
+    function payload() {
+      return {
+        masks: masks.map(({ id, ...mask }) => ({
+          ...mask,
+          x: Number(mask.x.toFixed(1)),
+          y: Number(mask.y.toFixed(1)),
+          width: Number(mask.width.toFixed(1)),
+          height: Number(mask.height.toFixed(1)),
+        })),
+      };
+    }
+
+    function updateOutput() {
+      jsonOutput.value = JSON.stringify(payload(), null, 2);
+      empty.classList.toggle("d-none", masks.length !== 0);
+    }
+
+    function updateControls() {
+      const mask = selected();
+      removeButton.disabled = !mask;
+      Object.values(inputs).forEach((input) => {
+        input.disabled = !mask;
+      });
+      if (!mask) return;
+      inputs.mode.value = mask.mode;
+      inputs.x.value = mask.x.toFixed(1);
+      inputs.y.value = mask.y.toFixed(1);
+      inputs.width.value = mask.width.toFixed(1);
+      inputs.height.value = mask.height.toFixed(1);
+    }
+
+    function render() {
+      stage.querySelectorAll(".motion-mask").forEach((element) => element.remove());
+      masks.forEach((mask) => {
+        const element = document.createElement("div");
+        element.className = "motion-mask " + mask.mode + (mask.id === selectedId ? " selected" : "");
+        element.style.left = mask.x + "%";
+        element.style.top = mask.y + "%";
+        element.style.width = mask.width + "%";
+        element.style.height = mask.height + "%";
+        element.dataset.id = mask.id;
+        element.innerHTML = '<span class="motion-mask-label">' + mask.mode + '</span><span class="motion-mask-handle" aria-hidden="true"></span>';
+        element.addEventListener("pointerdown", beginDrag);
+        stage.appendChild(element);
+      });
+      updateControls();
+      updateOutput();
+    }
+
+    function addMask(mode) {
+      const offset = Math.min(masks.length * 4, 30);
+      masks.push({ id: nextId++, mode, x: 12 + offset, y: 12 + offset, width: 28, height: 28 });
+      selectedId = masks[masks.length - 1].id;
+      render();
+    }
+
+    function beginDrag(event) {
+      const element = event.currentTarget;
+      const mask = masks.find((item) => item.id === Number(element.dataset.id));
+      selectedId = mask.id;
+      const bounds = stage.getBoundingClientRect();
+      drag = {
+        mode: event.target.classList.contains("motion-mask-handle") ? "resize" : "move",
+        mask,
+        startX: event.clientX,
+        startY: event.clientY,
+        bounds,
+        x: mask.x,
+        y: mask.y,
+        width: mask.width,
+        height: mask.height,
+      };
+      element.setPointerCapture(event.pointerId);
+      event.preventDefault();
+      render();
+    }
+
+    stage.addEventListener("pointermove", (event) => {
+      if (!drag) return;
+      const dx = (event.clientX - drag.startX) / drag.bounds.width * 100;
+      const dy = (event.clientY - drag.startY) / drag.bounds.height * 100;
+      if (drag.mode === "move") {
+        drag.mask.x = clamp(drag.x + dx, 0, 100 - drag.width);
+        drag.mask.y = clamp(drag.y + dy, 0, 100 - drag.height);
+      } else {
+        drag.mask.width = clamp(drag.width + dx, 3, 100 - drag.x);
+        drag.mask.height = clamp(drag.height + dy, 3, 100 - drag.y);
+      }
+      render();
+    });
+
+    stage.addEventListener("pointerup", () => {
+      drag = null;
+    });
+
+    document.querySelector("#add-include").addEventListener("click", () => addMask("include"));
+    document.querySelector("#add-exclude").addEventListener("click", () => addMask("exclude"));
+    removeButton.addEventListener("click", () => {
+      const index = masks.findIndex((mask) => mask.id === selectedId);
+      if (index !== -1) masks.splice(index, 1);
+      selectedId = masks.length ? masks[masks.length - 1].id : null;
+      render();
+    });
+    document.querySelector("#clear-masks").addEventListener("click", () => {
+      if (masks.length && window.confirm("Remove all motion masks?")) {
+        masks.splice(0);
+        selectedId = null;
+        render();
+      }
+    });
+
+    inputs.mode.addEventListener("change", () => {
+      const mask = selected();
+      if (mask) {
+        mask.mode = inputs.mode.value;
+        render();
+      }
+    });
+    ["x", "y", "width", "height"].forEach((field) => {
+      inputs[field].addEventListener("change", () => {
+        const mask = selected();
+        if (!mask) return;
+        const value = Number(inputs[field].value);
+        if (!Number.isFinite(value)) return;
+        if (field === "x") mask.x = clamp(value, 0, 100 - mask.width);
+        if (field === "y") mask.y = clamp(value, 0, 100 - mask.height);
+        if (field === "width") mask.width = clamp(value, 3, 100 - mask.x);
+        if (field === "height") mask.height = clamp(value, 3, 100 - mask.y);
+        render();
+      });
+    });
+
+    document.querySelector("#copy-json").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(jsonOutput.value);
+      showAlert("success", "Mask JSON copied to clipboard.", 2500);
+    });
+    document.querySelector("#download-json").addEventListener("click", () => {
+      const blob = new Blob([jsonOutput.value + "\n"], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "motion-guard-masks.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    render();
+  })();
+</script>
+</body>
+</html>
